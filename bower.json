@@ -1,0 +1,18 @@
+{
+  "name": "shoppeJs",
+  "main": "shoppe.js",
+  "version": "0.0.1",
+  "description": "A shopping cart for small e-commerce websites.",
+  "keywords": [
+    "e-commerce",
+    "online shop",
+    "shopping cart"
+  ],
+  "authors": [
+    "Chris Andrews <christophersimonandrews at gmail dot com> (http://github.com/triforce)"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/triforce/shoppejs",
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -1,0 +1,24 @@
+/* 
+* shoppeJs - styles
+* A shopping cart for small e-commerce websites
+* No dependencies required (apart from a modern browser)
+* Created by Chris Andrews
+*/
+
+.shoppeItemBox {
+	display: inline-block;
+	width: 200px;
+	position: relative;
+	border: 1px solid black;
+	padding: 10px;
+	vertical-align: top;
+}
+
+.shoppeItemCart {
+	display: inline-block;
+	width: 400px;
+	position: relative;
+	border: 2px solid black;
+	padding: 10px;
+	vertical-align: top;
+}

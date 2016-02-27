@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>shoppeJs Examples</title>
+	<meta name="description" content="shoppeJs Examples">
+	<meta name="author" content="Chris Andrews">
+
+	<!--Styles for the example page-->
+	<link rel="stylesheet" href="css/shoppe.css">
+
+	<script src="shoppe.js"></script>
+</head>
+<body>
+    <h1>shoppeJs Examples</h1>
+	<div class="shoppe-item shoppeItemBox" id="my-item-1">
+		<h3 id="item-name">My First Item</h3>
+		<p id="item-description">A really captivating description of the first item.</p>
+		<p id="item-price">10.00</p>
+		<button id="shoppe-add">Add item</button>
+	</div>
+	<div class="shoppe-item shoppeItemBox" id="my-item-2">
+		<h3 id="item-name">My Second Item</h3>
+		<p id="item-description">A really captivating description of the second item.</p>
+		<p id="item-price">8.00</p>
+		<button id="shoppe-add">Add item</button>
+	</div>
+    <div class="shoppe-item shoppeItemBox" id="my-item-3">
+        <h3 id="item-name">My Third Item</h3>
+        <p id="item-description">A really captivating description of the second item.</p>
+        <p id="item-price">13.50</p>
+        <button id="shoppe-add">Add item</button>
+    </div>
+	<div class="shoppe-cart shoppeItemCart">
+		<h3>Your Shopping Cart</h3>
+		<p>Item Count: <span class="shoppe-item-count"></span></p>
+		<p>Total: <span class="shoppe-cart-total"></span></p>
+		<br>
+		<button onclick="shoppeJs.clearItems()">Clear basket</button>
+	</div>
+	<script>shoppeJs.init({ currency: 'GBP'});</script>
+</body>
+</html>
