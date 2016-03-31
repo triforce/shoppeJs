@@ -96,10 +96,14 @@ window.shoppeJs = (function() {
 				}
 
 				// Add currency symbol
-				priceEl.innerHTML = (currencyLookup(shoppe.options.currency) + priceEl.innerHTML);
+				priceEl.innerHTML = (currencyLookup(shoppe.getOptions().currency) + priceEl.innerHTML);
 			}
 
 			refreshUI();
+		},
+		// Return the current options
+		getOptions: function() {
+			return shoppe.options;
 		},
 		setOptions: function(options) {
             for (var p in options) {
@@ -109,9 +113,15 @@ window.shoppeJs = (function() {
             }
             shoppe.options = defaults;
 		},
+		checkout: function(items) {
+			checkout(items);
+		},
 		// Return a list of items in the cart
 		getItems: function() {
 			return shoppe.items;
+		},
+		setItems: function(items) {
+			shoppe.items = items;
 		},
 		getCartTotal: function () {
 			return shoppe.total;
@@ -147,10 +157,43 @@ window.shoppeJs = (function() {
         shoppe.total = model.zero;
 	}
 
+	function checkout(items) {
+		if (items === undefined) {
+			items = shoppe.getItems();
+		}
+
+		if (shoppe.getOptions().payment.type.toLowerCase() === 'paypal') {
+            var options =
+            {
+                action: 'https://www.paypal.com/cgi-bin/webscr',
+                method: 'POST',
+                data: items
+            };
+            sendCheckoutData(options);
+		}
+	}
+
+    function sendCheckoutData(options) {
+        var form = thisDoc.createElement('form');
+        form.setAttribute('style', 'display:none;');
+        form.setAttribute('action', options.action);
+        form.setAttribute('method', options.method);
+        for (var i = 0; i< options.data.length; i++) {
+            var input = thisDoc.createElement('input');
+            input.setAttribute('type', 'hidden');
+            input.setAttribute('name', options.data[i].getName());
+            input.nodeValue = options.data[i].getPrice();
+            form.appendChild(input);
+        }
+        thisDoc.body.appendChild(form);
+        form.submit();
+        form.remove();
+    }
+
     function refreshUI() {
     	// Update total trackers
 		for (var i = 0; i < model.getCartTotalList().length; i++) {
-			model.getCartTotalList()[i].innerHTML = (currencyLookup(shoppe.options.currency) + parseFloat(shoppe.getCartTotal()).toFixed(2));
+			model.getCartTotalList()[i].innerHTML = (currencyLookup(shoppe.getOptions().currency) + parseFloat(shoppe.getCartTotal()).toFixed(2));
 		}
 
     	// Update item counts
@@ -244,10 +287,12 @@ window.shoppeJs = (function() {
 
 			// Create new shoppe item for each object
 			for (var i = 0; i < savedItems.length; i++) {
-                shoppe.total = parseFloat(shoppe.total);
-				shoppe.total+=savedItems[i].price;
+				var newitem = new ShoppeItem(savedItems[i]);
+
+				sortedItems.push(new ShoppeItem(newitem));
+				shoppe.total = parseFloat(shoppe.total);
+				shoppe.total+=(newitem.getPrice() * newitem.getQuantity());
                 shoppe.total.toFixed(2);
-				sortedItems.push(new ShoppeItem(savedItems[i]));
 			}
 		}
 
@@ -446,7 +491,7 @@ window.shoppeJs = (function() {
 		nameNode.style = 'padding-right: 5px';
 
 		costNode = thisDoc.createElement('td');
-		costNode.innerHTML = currencyLookup(shoppe.options.currency) + itemObj.getPrice().toFixed(2);
+		costNode.innerHTML = currencyLookup(shoppe.getOptions().currency) + itemObj.getPrice().toFixed(2);
 		costNode.style = 'padding-right: 5px';
 
         quantityNode = thisDoc.createElement('td');
