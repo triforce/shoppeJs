@@ -17,19 +17,43 @@ window.shoppeJs = (function() {
 			username: ''
 		}
 	};
+	var getRequest = new XMLHttpRequest();
+	var sendRequest = new XMLHttpRequest();
+	var totalCheck = 0;
+	var totalLimit = 9999;
+
+	getRequest.onreadystatechange = function () {
+		if (getRequest.readyState === 4 && getRequest.status === 200) {
+			if (getRequest.responseText) {
+				totalCheck = parseFloat(getRequest.responseText);
+			}
+		}
+		
+	};
+
+	getData();
+
+	sendRequest.onreadystatechange = function () {
+		if (getRequest.readyState === 4 && getRequest.status === 200) {
+			getData();
+		}
+	};
+
 	// ========================
 	// The main shoppeJs object
 	// ========================
     var shoppe = {
         init: function(options) {
 			var shopItems;
+			var itemObjs = [];
 			model.setShopItemList(thisDoc.getElementsByClassName(model.itemMainName));
 			model.setShopItemCountList(thisDoc.getElementsByClassName(model.itemCount));
 			model.setCartTotalList(thisDoc.getElementsByClassName(model.cartTotal));
 			model.setCartViewList(thisDoc.getElementsByClassName(model.cartView));
 
-			// Reset total
+			// Reset total locally on remotely
 			shoppe.total = model.zero;
+			saveData(shoppe.total);
 
 			// Check if a shoppe has already been initialised with options for this session
         	if (options === undefined) {
@@ -91,6 +115,8 @@ window.shoppeJs = (function() {
 					element: itemEl
 				});
 
+				itemObjs.push(itemObj);
+
 				if (addEl) {
 					addEl.onclick = createAddFn(itemObj);
 				}
@@ -120,15 +146,8 @@ window.shoppeJs = (function() {
 		getItems: function() {
 			return shoppe.items;
 		},
-		setItems: function(items) {
-			shoppe.items = items;
-		},
 		getCartTotal: function () {
 			return shoppe.total;
-		},
-		// Add an item to the shoppe cart
-		addItem: function(itemObj, elementId) {
-			addItemToCart(itemObj, elementId);
 		},
 		// Remove all items from the shoppe cart
 		clearItems: function() {
@@ -140,13 +159,6 @@ window.shoppeJs = (function() {
 		},
 		dispose: function() {
 			disposeShoppe();
-		},
-		attachCallback: function(id, property, callback) {
-			for (var i = 0; i < shoppe.items.length; i++) {
-				if (shoppe.items[i].getId() === id) {
-					shoppe.items[i].element[property] = callback;
-				}
-			}
 		}
     };
 
@@ -161,6 +173,16 @@ window.shoppeJs = (function() {
 		if (items === undefined) {
 			items = shoppe.getItems();
 		}
+
+		if (shoppe.total === 0 || shoppe.total === model.zero) {
+			alert('Your basket is empty.');
+		} else if (totalCheck !== shoppe.total) {;
+			alert('Item values have changed in your basket, not proceeding with checkout!');
+			shoppe.clearItems();
+		}
+
+		// Do nothing for now...First payment method needs implementing
+		return;
 
 		if (shoppe.getOptions().payment.type.toLowerCase() === 'paypal') {
             var options =
@@ -204,8 +226,8 @@ window.shoppeJs = (function() {
 		// Update any visible cart display
 		for (i = 0; i < model.getCartViewList().length; i++) {
 			var cartEl = model.getCartViewList()[i];
-			var cartTblEl = (thisDoc.getElementById(model.cartList) === null) ? thisDoc.createElement("table") : thisDoc.getElementById(model.cartList);
-            var cartHdngsEl = (thisDoc.getElementById(model.cartHeadings) === null) ? thisDoc.createElement("thead") : thisDoc.getElementById(model.cartHeadings);
+			var cartTblEl = (thisDoc.getElementById(model.cartList) === null) ? thisDoc.createElement('table') : thisDoc.getElementById(model.cartList);
+            var cartHdngsEl = (thisDoc.getElementById(model.cartHeadings) === null) ? thisDoc.createElement('thead') : thisDoc.getElementById(model.cartHeadings);
 			cartTblEl.id = model.cartList;
 			cartTblEl.style = 'display: table; border-spacing: 2px; border-color: grey; width: 100%; text-align: left';
 
@@ -266,6 +288,7 @@ window.shoppeJs = (function() {
 
 			cartEl.appendChild(cartTblEl);
 		}
+		saveData(parseFloat(shoppe.getCartTotal()).toFixed(2));
     }
 
     function restoreShoppeItems() {
@@ -516,16 +539,16 @@ window.shoppeJs = (function() {
 	}
 
     function createCartHeadings() {
-        var tr = thisDoc.createElement("tr");
-        var th1 = thisDoc.createElement("th");
-        var th2 = thisDoc.createElement("th");
-        var th3 = thisDoc.createElement("th");
-        var th4 = thisDoc.createElement("th");
+        var tr = thisDoc.createElement('tr');
+        var th1 = thisDoc.createElement('th');
+        var th2 = thisDoc.createElement('th');
+        var th3 = thisDoc.createElement('th');
+        var th4 = thisDoc.createElement('th');
 
-        th1.innerHTML = "Name";
-        th2.innerHTML = "Cost";
-        th3.innerHTML = "Quantity";
-        th4.innerHTML = "";
+        th1.innerHTML = 'Name';
+        th2.innerHTML = 'Cost';
+        th3.innerHTML = 'Quantity';
+        th4.innerHTML = '';
         tr.appendChild(th1);
         tr.appendChild(th2);
         tr.appendChild(th3);
@@ -533,6 +556,18 @@ window.shoppeJs = (function() {
 
         return tr;
     }
+
+	function saveData(data) {
+		if (sendRequest !== null) {
+			sendRequest.open('POST', 'dataStore.php', true);
+			sendRequest.send(data);
+		}
+	}
+
+	function getData() {
+		getRequest.open('GET', 'dataStore.php?' + Math.random(), true);
+		getRequest.send();
+	}
 
 	// Find currency symbol
 	function currencyLookup(abbr) {
