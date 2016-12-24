@@ -7,7 +7,6 @@
 
 window.shoppeJs = (function() {
 	var model = new ShoppeModel();
-	var uniqueId = new Date().getTime() * Math.random() + '';
 	var store = window.sessionStorage;
 	var thisDoc = document;
 	var defaults = {
@@ -36,7 +35,7 @@ window.shoppeJs = (function() {
 				if (JSON.parse(getRequest.responseText)) {
 					requestData = JSON.parse(getRequest.responseText);
 					if (requestData.error) {
-						// console.error("A fatal error occured");
+                                               console.error("A fatal error occured.");
 					}
 					if (requestData.data) {
 						totalCheck = parseFloat(requestData.data);
@@ -46,17 +45,18 @@ window.shoppeJs = (function() {
 		}
 	};
 
-	getData();
-
 	sendRequest.onreadystatechange = function () {
 		if (sendRequest.readyState === 4 && sendRequest.status === 200) {
 			if (sendRequest.responseText) {
-				// console.log(sendRequest.responseText);
+                               console.log("Error occured on server.");
 			} else {
 				getData();
 			}
 		}
 	};
+
+       // Response triggers a getData request
+       initSession();
 
 	// ========================
 	// The main shoppeJs object
@@ -575,23 +575,28 @@ window.shoppeJs = (function() {
 		return tr;
 	}
 
+       function initSession() {
+               if (sendRequest !== null) {
+                       sendRequest.open('POST', 'sessionHandler.php', true);
+                       sendRequest.send(JSON.stringify({ init: true }));
+               }
+       }
+
 	function saveData(data) {
 		if (sendRequest !== null) {
-			// console.log({ id: uniqueId, data: data });
-			sendRequest.open('POST', 'dataStore.php', true);
-			sendRequest.send(JSON.stringify({ id: uniqueId, data: data }));
+                       sendRequest.open('POST', 'sessionHandler.php', true);
+                       sendRequest.send(JSON.stringify({ data: data }));
 		}
 	}
 
 	function getData() {
-		// console.log(uniqueId);
-		getRequest.open('GET', 'dataStore.php?id=' + uniqueId + '&code=' + Math.random(), true);
+               getRequest.open('GET', 'sessionHandler.php?&code=' + Math.random(), true);
 		getRequest.send();
 	}
 
 	function handleCancel() {
 		if (getRequest !== null) {
-			getRequest.open('GET', 'dataStore.php?id=' + uniqueId + '&code=' + Math.random() + '&cancel=true', true);
+                       getRequest.open('GET', 'sessionHandler.php?&code=' + Math.random() + '&cancel=true', true);
 			getRequest.send();
 		}
 	}
